@@ -1197,7 +1197,7 @@ def main() -> None:
     # Skip during install/uninstall (hook writes trigger a fresh check anyway).
     # Skip during hook-check — it runs on every editor tool use and must be silent.
     # Deduplicate paths so platforms sharing the same install dir don't warn twice.
-    _silent_cmds = {"install", "uninstall", "hook-check"}
+    _silent_cmds = {"install", "uninstall", "hook-check", "review-context"}
     if not any(arg in _silent_cmds for arg in sys.argv):
         for skill_dst in {Path.home() / cfg["skill_dst"] for cfg in _PLATFORM_CONFIG.values()}:
             _check_skill_version(skill_dst)
@@ -1239,6 +1239,10 @@ def main() -> None:
         print("    --dfs                   use depth-first instead of breadth-first")
         print("    --context C             explicit edge-context filter (repeatable)")
         print("    --budget N              cap output at N tokens (default 2000)")
+        print("    --graph <path>          path to graph.json (default graphify-out/graph.json)")
+        print("  review-context          emit PR-review-oriented related-file context as JSON")
+        print("    --changed-file PATH     repeatable changed file path seed")
+        print("    --changed-files-json P  JSON list of changed files (GitHub-style filename/path keys)")
         print("    --graph <path>          path to graph.json (default graphify-out/graph.json)")
         print("  save-result             save a Q&A result to graphify-out/memory/ for graph feedback loop")
         print("    --question Q            the question asked")
@@ -1556,6 +1560,10 @@ def main() -> None:
                 context_filters=context_filters,
             )
         )
+    elif cmd == "review-context":
+        from graphify.review_context import cli as review_context_cli
+
+        sys.exit(review_context_cli(sys.argv[2:]))
     elif cmd == "save-result":
         # graphify save-result --question Q --answer A --type T [--nodes N1 N2 ...]
         import argparse as _ap

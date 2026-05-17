@@ -234,6 +234,8 @@ graphify export callflow-html      # Mermaid architecture/call-flow HTML (auto-r
 /graphify query "what connects auth to the database?"
 /graphify path "UserService" "DatabasePool"
 /graphify explain "RateLimiter"
+graphify review-context --changed-file src/api.py --changed-file src/service.py
+graphify review-context --changed-files-json changed_files.json
 
 /graphify add https://arxiv.org/abs/1706.03762   # fetch a paper and add it
 /graphify add <youtube-url>                       # transcribe and add a video
