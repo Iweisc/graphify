@@ -86,3 +86,22 @@ def test_review_context_normalizes_absolute_graph_source_paths(tmp_path):
 
     payload = build_review_context(load_graph(graph_path), ["src/api.py"], max_related_files=3)
     assert payload["related_files"][0]["path"] == "src/service.py"
+
+
+def test_review_context_normalizes_absolute_graph_source_paths(tmp_path):
+    repo_root = tmp_path / "repo"
+    out_dir = repo_root / "graphify-out"
+    out_dir.mkdir(parents=True)
+
+    G = nx.DiGraph()
+    G.add_node("api_file", label="api.py", source_file=str(repo_root / "src/api.py"), community=0)
+    G.add_node("service_file", label="service.py", source_file=str(repo_root / "src/service.py"), community=0)
+    G.add_edge("api_file", "service_file", relation="imports", confidence="EXTRACTED")
+
+    graph_path = out_dir / "graph.json"
+    graph_path.write_text(json.dumps(json_graph.node_link_data(G, edges="links")), encoding="utf-8")
+
+    from graphify.review_context import load_graph
+
+    payload = build_review_context(load_graph(graph_path), ["src/api.py"], max_related_files=3)
+    assert payload["related_files"][0]["path"] == "src/service.py"
